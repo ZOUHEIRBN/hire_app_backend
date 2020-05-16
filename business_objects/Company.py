@@ -1,0 +1,33 @@
+from bindings import database
+
+def get_data(query, requester_id=None, return_unique=False):
+    users = database['companies'].find(query, {'_id': 0, 'password': 0})
+    users = [x for x in users]
+    if requester_id:
+        requester = dict(database['users'].find_one({'email': requester_id}, {'_id': 0, 'password': 0}))
+        for x in users:
+            print(x)
+            x["badges"] = []
+            if x == requester:
+                continue
+
+            if requester["email"] in x["following"] and x["email"] in requester["following"]:
+                x["badges"].append({"category": "social", "name": "Friend"})
+
+            elif x["email"] in requester["following"]:
+                x["badges"].append({"category": "social", "name": "Follower"})
+
+            elif requester["email"] in x["following"]:
+                x["badges"].append({"category": "social", "name": "Following"})
+
+            if True:
+                x["badges"].append({"category": "match", "name": "Watchout"})
+
+
+    if len(users) == 1 or return_unique:
+        return users[0]
+    return {'body': users}
+
+class User:
+    def __init__(self):
+        pass

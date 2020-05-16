@@ -1,0 +1,158 @@
+{
+  "posts": [
+    {
+      "id": 1,
+      "type": "offer",
+      "ownerId": "TBzXhOA",
+      "title": "Caissier",
+      "salary": 3000,
+      "workhours": 10,
+      "workdays": 5,
+      "description": "lorem ipsum",
+      "badges": [
+        {
+          "category": "fav",
+          "name": "Favorite"
+        },
+        {
+          "category": "jobtype",
+          "name": "Recruitment"
+        },
+        {
+          "category": "match",
+          "name": "High Match"
+        }
+      ],
+      "imageUrl": "https://source.unsplash.com/1600x900/?product"
+    },
+    {
+      "id": 2,
+      "type": "demand",
+      "ownerId": "TBzXhOA",
+      "title": "Livreur",
+      "salary": 4500,
+      "workhours": 10,
+      "workdays": 5,
+      "description": "lorem ipsum",
+      "badges": [
+        {
+          "category": "fav",
+          "name": "Favorite"
+        },
+        {
+          "category": "jobtype",
+          "name": "Stage"
+        },
+        {
+          "category": "match",
+          "name": "Watchout"
+        }
+      ],
+      "imageUrl": "https://source.unsplash.com/1600x900/?product"
+    },
+    {
+      "id": 3,
+      "type": "offer",
+      "ownerId": "ABCInfo",
+      "title": "Livreur",
+      "salary": 4500,
+      "workhours": 10,
+      "workdays": 5,
+      "description": "lorem ipsum",
+      "badges": [
+        {
+          "category": "fav",
+          "name": "Favorite"
+        },
+        {
+          "category": "jobtype",
+          "name": "Stage"
+        },
+        {
+          "category": "match",
+          "name": "Watchout"
+        }
+      ],
+      "imageUrl": "https://source.unsplash.com/1600x900/?product"
+    }
+  ],
+  "users": [
+    {
+      "id": "TBzXhOA",
+      "email": "ZouheirBN",
+      "password": "banou",
+      "first_name": "Zouheir",
+      "last_name": "Banou",
+      "imageUrl": "https://source.unsplash.com/1600x900/?product",
+      "badges": [
+        {
+          "category": "social",
+          "name": "Friends"
+        },
+        {
+          "category": "jobtype",
+          "name": "Chercheur"
+        }
+      ]
+    },
+    {
+      "id": "TBzXhOB",
+      "email": "ImadHR",
+      "password": "leo",
+      "first_name": "Imad",
+      "last_name": "HR",
+      "imageUrl": "https://source.unsplash.com/1600x900/?product",
+      "badges": [
+        {
+          "category": "social",
+          "name": "Friends"
+        },
+        {
+          "category": "jobtype",
+          "name": "Stagiaire"
+        }
+      ]
+    },
+    {
+      "id": "3EP70ta",
+      "email": "AliRA",
+      "password": "leo",
+      "first_name": "Ali",
+      "last_name": "RA",
+      "imageUrl": "https://source.unsplash.com/1600x900/?product",
+      "badges": [
+        {
+          "category": "social",
+          "name": "Friends"
+        },
+        {
+          "category": "jobtype",
+          "name": "Stagiaire"
+        }
+      ]
+    }
+  ],
+  "companies": [
+    {
+      "id": "ABCInfo",
+      "title": "ABC Infographics Corp.",
+      "password": "banou",
+      "ownerId": "ZouheirBN",
+      "address": {
+        "latitude": 33.6084139,
+        "longitude": -7.534395
+      },
+      "imageUrl": "https://source.unsplash.com/1600x900/?product",
+      "badges": [
+        {
+          "category": "social",
+          "name": "Friends"
+        },
+        {
+          "category": "jobtype",
+          "name": "Chercheur"
+        }
+      ]
+    }
+  ]
+}
