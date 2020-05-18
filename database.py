@@ -1,7 +1,7 @@
 
 from bindings import database
 
-#users = database['posts'].update_one({'title': 'Java EE Formation'}, {"$set": {"ownerId": "ABCInfo"}})
+users = database['posts'].update_many({}, {"$set": {"comments": []}})
 #database['posts'].delete_one({'title': 'Java EE Formation'})
-posts = database['companies'].find({})
-print([x for x in posts])
+posts = database['posts'].find({})
+print([x for x in posts][0])

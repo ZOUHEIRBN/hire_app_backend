@@ -1,3 +1,4 @@
+import time, datetime
 from bson import ObjectId
 from flask import request
 from bindings import database
@@ -13,7 +14,6 @@ def post_cr():
         return get_data({})
     elif request.method == 'POST':
         post = request.get_json()
-        print(post)
         database['posts'].insert_one(post)
     return {}
 
@@ -35,3 +35,21 @@ def get_posts_by_owner_id(id):
 def get_posts_by_type(type):
     return get_data({'type': type})
 
+#Comments
+@app.route(post_namespace+'<post_id>/comment/', methods=['PUT', 'POST'])
+def add_comment(post_id):
+    if request.method == 'POST':
+        comment = request.get_json()
+        comment['timestamp'] = str(datetime.datetime.now())
+        print(comment)
+        database['posts'].update({'_id': ObjectId(post_id)}, {
+         '$push': {'comments': comment}
+        })
+    elif request.method == 'PUT':
+        comment = request.get_json()
+        comment['timestamp'] = str(datetime.datetime.now())
+        print(comment)
+        database['posts'].update({'_id': ObjectId(post_id)}, {
+         '$push': {'comments': comment}
+        })
+    return {}
