@@ -21,7 +21,7 @@ def preprocess(x):
         commenting_user = User.get_data({
             '_id': ObjectId(comment['commenting_user'])
         })
-        print(comment)
+
         if 'body' in commenting_user.keys() and len(commenting_user['body']) == 0:
             commenting_user = Company.get_data({
                 '_id': ObjectId(comment['commenting_user'])
