@@ -1,4 +1,4 @@
-from bindings import app
+from bindings import app, socket
 
 if __name__ == '__main__':
-    app.run(port=3000)
+    socket.run(app, port=3000)

@@ -3,8 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ user.email}}</title>
+    <style>
+      @page {
+        size: 21cm 29.7cm;
+        margin: 27mm 16mm 27mm 16mm;
+      }
+      :root{
+        --dark: #01579B;
+        --medium: #03a9f4;
+        --light:  #f5fcff;
+      }
+      *{
+        margin: 0 auto;
+      }
+      body{
+        background-color: white;
+        font-family: 'Helvetica', 'Roboto', sans-serif;
+      }
+      .header{
+        background-color: white;
+        color: var(--dark);
+        width: calc(100% - 20px);
+        display: flex;
+        padding: 10px;
+      }
+      .profileImage{
+        height: 100px;
+        width: 100px;
+        background-image: url('https://homepages.cae.wisc.edu/~ece533/images/airplane.png');
+        background-size: contain;
+        border-radius: 100%;
+        flex-shrink: 0;
+      }
+      .userInfo{
+        margin-left: 10px
+      }
+      .resumeSection{
+        background-color: var(--light);
+        display: flex;
+        flex-direction: column;
+      }
+      .resumeSection>table{
+        width: 90%
+      }
+
+      .resumeSection>table caption {
+          border-bottom: 1px solid var(--medium);
+          text-align: left;
+          margin: 1.5% 0%;
+          color: var(--medium);
+          font-size: x-large;
+          font-weight: bold;
+      }
+      .resumeSection>table tr{
+        align-items: flex-start;
+        display: flex;
+      }
+      .resumeSection>table tr>td{
+        flex: 30% 1 0;
+        padding: 0% 1.5%;
+        text-align: left;
+      }
+      .resumeSection>table tr>td:first-child{
+        flex: 30% 0 0;
+        padding: 0% 1.5%;
+        text-align: right;
+      }
+      .resumeSection+.resumeSection{
+        background-color: white
+      }
+      b{
+        color: #424242;
+      }
+    </style>
 </head>
 <body>
-    {{ user.email}}
+  <div class="header">
+    <div class="profileImage"></div>
+    <div class="userInfo">
+      <h1>Lorem IPSUM</h1>
+      <p>06 66 66 66 66</p>
+      <email>lorem.ipsum@dolorsit.amet</email>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore
+      </p>
+    </div>
+  </div>
+  <section class="resumeSection">
+    <table>
+      <caption>Academic Cursus</caption>
+      {% for ac in user.resume['academic_cursus']%}
+      <tr>
+        <td>
+          <b>{{ ac['school'] }}</b>
+          <p>{{ ac['begin_date'] }} - {{ ac['end_date'] }}</p>
+        </td>
+        <td>
+          <b>{{ ac['title'] }}</b>
+          <p>
+            <!-- (Description) Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. -->
+          </p>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </section>
+  <section class="resumeSection">
+    <table>
+      <caption>Professionnal experience</caption>
+      {% for pro in user.resume['professionnal_cursus']%}
+      <tr>
+        <td>
+          <b>{{ pro['organization'] }}</b>
+          <p>{{ pro['begin_date'] }} - {{ pro['end_date'] }}</p>
+        </td>
+        <td>
+          <b>{{ pro['title'] }}</b>
+          <p>
+            {{ pro['description'] }}
+          </p>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </section>
 </body>
 </html>

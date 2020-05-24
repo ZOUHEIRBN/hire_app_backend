@@ -1,6 +1,7 @@
+import pdfkit
 from bson import ObjectId
 from flask import Response, request, render_template, send_file
-
+import requests
 from business_objects.User import *
 from bindings import database, client, SERVER_URL
 from main import app
@@ -28,7 +29,10 @@ def write_resume(id):
 
 @app.route(user_namespace+'<id>/resume/pdf', methods=['GET'])
 def get_pdf_resume(id):
-    html = HTML(SERVER_URL+user_namespace+id+'/resume/write')
+    #html = HTML(SERVER_URL+user_namespace+id+'/resume/write')
+    r = requests.get(SERVER_URL+user_namespace+id+'/resume/write').content
+    print(r)
+    html = HTML(string=r)
     pdf = html.write_pdf()
     return send_file(BytesIO(pdf), attachment_filename='google.pdf')
 

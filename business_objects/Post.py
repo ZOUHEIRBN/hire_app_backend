@@ -10,9 +10,9 @@ def preprocess(x):
     del x['_id']
 
     # Getting post owner data
-    owner = User.get_data({'email': x['ownerId']})
+    owner = User.get_data({'_id': ObjectId(x['ownerId'])})
     if 'body' in owner.keys() and len(owner['body']) == 0:
-        owner = Company.get_data({'id': x['ownerId']})
+        owner = Company.get_data({'_id': ObjectId(x['ownerId'])})
 
     x['owner'] = owner
 

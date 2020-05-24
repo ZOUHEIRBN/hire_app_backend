@@ -14,11 +14,10 @@ def get_data(query, requester_id=None, return_unique=False):
     users = [x for x in users]
     users = [clean_id(x) for x in users]
     if requester_id:
-        requester = dict(database['users'].find_one({'email': requester_id}, {'_id': 0, 'password': 0}))
+        requester = database['users'].find_one({'email': requester_id}, {'_id': 0, 'password': 0})
         for x in users:
-            print(x)
             x["badges"] = []
-            if x == requester:
+            if requester is None or x == dict(requester):
                 continue
 
             if requester["email"] in x["following"] and x["email"] in requester["following"]:
