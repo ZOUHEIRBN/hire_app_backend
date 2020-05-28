@@ -21,8 +21,8 @@ def user_cr():
     return {}
 
 @app.route(user_namespace+'<id>')
-def get_user(id):
-    return get_data({'_id': ObjectId(id)})
+def get_user(id, req_id=None):
+    return get_data({'_id': ObjectId(id)}, requester_id=req_id)
 
 @app.route(user_namespace+'email/<email>')
 def get_user_by_email(email):
@@ -42,16 +42,20 @@ def get_user_by_credentials(email, password):
 @app.route(user_namespace+'<following_id>/follow', methods=['PUT'])
 def follow(following_id):
     current = request.get_json()
+    if current is None:
+        print('None')
+        current = get_user(following_id, current['id'])
+        return current
+
     f_list = database['users'].find({'_id': ObjectId(current['id'])}, {'_id':0, 'following': 1})
     f_list = [f for f in f_list][0]['following']
-
-    if current is None:
-        return {}
 
     if {'id': ObjectId(following_id)} in f_list: #Unfollow
         database['users'].update({'_id': ObjectId(current['id'])}, {
             '$pull': {'following': {'id': ObjectId(following_id)}}
         })
+        unfollowed = get_user(following_id, current['id'])
+        return unfollowed
 
     else: #Follow
         database['users'].update({'_id': ObjectId(current['id'])}, {
@@ -59,7 +63,7 @@ def follow(following_id):
         })
 
         #Notify the user of new follower
-        new_followed = get_user(following_id)
+        new_followed = get_user(following_id, current['id'])
         notification = {
             'id': str(ObjectId()),
             'from': current,
@@ -74,5 +78,7 @@ def follow(following_id):
         for r in recipients:
             notify(r, notification, 'user_following')
 
-    return current
+        return new_followed
+
+
 

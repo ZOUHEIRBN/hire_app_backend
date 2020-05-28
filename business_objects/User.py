@@ -52,10 +52,10 @@ def preprocess(x, requester_id=None):
             x["badges"].append({"category": "social", "name": "You mutually follow each other"})
 
         elif requester["id"] in [f['id'] for f in x["followers"]]:
-            x["badges"].append({"category": "social", "name": "Follows you"})
+            x["badges"].append({"category": "social", "name": "You are a follower"})
 
         elif requester["id"] in [f['id'] for f in x["following"]]:
-            x["badges"].append({"category": "social", "name": "You are a follower"})
+            x["badges"].append({"category": "social", "name": "Follows you"})
     if True:
         x["badges"].append({"category": "match", "name": "Watchout"})
 
