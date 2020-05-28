@@ -40,7 +40,7 @@ def get_user_by_credentials(email, password):
     return {}
 
 @app.route(user_namespace+'<following_id>/follow', methods=['PUT'])
-def follow(following_id):
+def follow_user(following_id):
     current = request.get_json()
     if current is None:
         print('None')
@@ -67,7 +67,7 @@ def follow(following_id):
         notification = {
             'id': str(ObjectId()),
             'from': current,
-            'title': '{} {} ({}) has started following you'.format(current['first_name'], current['last_name'].upper(), current['email']),
+            'title': '{} {} (@{}) has started following you'.format(current['first_name'], current['last_name'].upper(), current['email']),
             'timestamp': str(datetime.now()),
             'state': True,
             'type': 'Users',

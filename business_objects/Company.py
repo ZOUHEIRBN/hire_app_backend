@@ -1,33 +1,40 @@
+from bson import ObjectId
+
 from bindings import database
+def clean_id(x):
+    if '_id' in x.keys():
+        x['id'] = str(x['_id'])
+        del x['_id']
 
-def get_data(query, requester_id=None, return_unique=False):
-    users = database['companies'].find(query, {'_id': 0, 'password': 0})
-    users = [x for x in users]
-    if requester_id:
-        requester = dict(database['users'].find_one({'email': requester_id}, {'_id': 0, 'password': 0}))
-        for x in users:
-            print(x)
-            x["badges"] = []
-            if x == requester:
-                continue
+    elif x['id'] is not None:
+        x['id'] = str(x['id'])
 
-            if requester["email"] in x["following"] and x["email"] in requester["following"]:
-                x["badges"].append({"category": "social", "name": "Friend"})
+    return x
+def preprocess(x, requester_id=None):
+    x = clean_id(x)
+    if requester_id and requester_id != '0':
+        requester = dict(database['users'].find_one({'_id': ObjectId(requester_id)},
+                                                    {'_id': 1, 'email': 1, "following": 1}
+                                                    ))
 
-            elif x["email"] in requester["following"]:
-                x["badges"].append({"category": "social", "name": "Follower"})
+        x["badges"] = []
+        if x == requester:
+            return x
 
-            elif requester["email"] in x["following"]:
-                x["badges"].append({"category": "social", "name": "Following"})
+        if {'id': ObjectId(x['id'])} in requester["following"]:
+            x["badges"].append({"category": "social", "name": "You follow"})
 
-            if True:
-                x["badges"].append({"category": "match", "name": "Watchout"})
+        if True:
+            x["badges"].append({"category": "match", "name": "Watchout"})
 
+    return x
 
-    if len(users) == 1 or return_unique:
-        return users[0]
-    return {'body': users}
+def get_data(query, requester_id=None, return_unique=None):
+    companies = database['companies'].find(query, {'password': 0})
+    companies = [preprocess(x, requester_id) for x in companies]
 
-class User:
-    def __init__(self):
-        pass
+    if return_unique is False:
+        return {'body': companies}
+    if len(companies) == 1:
+        return companies[0]
+    return {'body': companies}
