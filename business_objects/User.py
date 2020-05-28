@@ -7,7 +7,7 @@ def decrypt_password(crypted):
     return crypted
 def get_following_data(x):
     following = database['users'].find({
-        'email': {'$in': x['following']}
+        '_id': {'$in': [f['id'] for f in x['following']]}
     },
         {'_id': 1, 'email': 1, 'first_name': 1, 'last_name': 1, 'imageUrl': 1})
     following = [f for f in following]
@@ -16,7 +16,8 @@ def get_following_data(x):
 
 def get_followers_data(x):
     followers = database['users'].find({
-        'following': {'$elemMatch': {'$eq': x['email']}}
+        'following': {'$elemMatch': {'$eq': {'id': ObjectId(x['id'])}
+                                     }}
     },
         {'_id': 1, 'email': 1, 'first_name': 1, 'last_name': 1, 'imageUrl': 1})
     followers = [f for f in followers]
@@ -39,20 +40,22 @@ def preprocess(x, requester_id=None):
     x['following'] = get_following_data(x)
     x['followers'] = get_followers_data(x)
     x["badges"] = []
-    if requester_id:
-        requester = database['users'].find_one({'email': requester_id}, {'_id': 0, 'password': 0})
+    if requester_id and requester_id != '0':
+        requester = database['users'].find_one({'_id': ObjectId(requester_id)}, {'_id': 1, 'following': 1})
 
         if requester is None or x == dict(requester):
             return x
 
-        if requester["email"] in x["following"] and x["email"] in requester["following"]:
-            x["badges"].append({"category": "social", "name": "Friend"})
+        requester = clean_id(requester)
 
-        elif x["email"] in requester["following"]:
-            x["badges"].append({"category": "social", "name": "Follower"})
+        if requester["id"] in [f['id'] for f in x["followers"]] and requester["id"] in [f['id'] for f in x["following"]]:
+            x["badges"].append({"category": "social", "name": "You mutually follow each other"})
 
-        elif requester["email"] in x["following"]:
-            x["badges"].append({"category": "social", "name": "Following"})
+        elif requester["id"] in [f['id'] for f in x["followers"]]:
+            x["badges"].append({"category": "social", "name": "Follows you"})
+
+        elif requester["id"] in [f['id'] for f in x["following"]]:
+            x["badges"].append({"category": "social", "name": "You are a follower"})
     if True:
         x["badges"].append({"category": "match", "name": "Watchout"})
 
