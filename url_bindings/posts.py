@@ -15,7 +15,7 @@ def post_crd():
         return get_data({})
     elif request.method == 'POST':
         post = request.get_json()
-
+        post['submissions'] = []
         post['comments'] = []
         database['posts'].insert_one(post)
     elif request.method == 'PUT':
