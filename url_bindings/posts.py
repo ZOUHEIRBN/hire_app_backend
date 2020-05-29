@@ -2,7 +2,7 @@ import time, datetime
 from bson import ObjectId
 from flask import request
 from bindings import database
-from business_objects.Post import get_data, preprocess
+from business_objects.Post import get_data
 from business_objects.User import get_data as ugd
 from main import app, socket
 

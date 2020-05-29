@@ -3,24 +3,45 @@ from datetime import datetime
 from bson import ObjectId
 
 from bindings import database
-from business_objects.Company import get_data, preprocess
+from business_objects.Company import get_data
+from business_objects.User import get_data as ugd
 from main import app
 from url_bindings.sockets import *
 
 company_namespace = '/companies/'
 
 
-@app.route(company_namespace, methods=['GET', 'POST'])
-def company_cr():
+@app.route(company_namespace, methods=['GET', 'POST', 'PUT'])
+def company_cru():
     if request.method == 'GET':
         return get_data({}, requester_id=request.args.get('current_user'), return_unique=False)
     elif request.method == 'POST':
         company = request.get_json()
+        company['creation_date'] = str(datetime.now())
         database['companies'].insert_one(company)
-    return {}
+        company['id'] = str(company['_id'])
+        del company['_id']
+        return company
+    elif request.method == 'PUT':
+        company = request.get_json()
+        old_company = get_data({'_id': ObjectId(company['id'])})
+        for k, v in company.items():
+            if k not in ['id', 'creation_date', 'ownerId']:
+                old_company[k] = v
 
+        database['companies'].update({'_id': ObjectId(company['id'])}, old_company)
 
-@app.route(company_namespace+'<id>')
+        #old_company['owner'] = ugd({'_id': ObjectId(old_company['ownerId'])})
+
+        return old_company
+
+@app.route(company_namespace+'<id>', methods=['DELETE'])
+def delete_company(id):
+    old_company = get_data({'_id': ObjectId(id)})
+    database['companies'].delete_one({'_id': ObjectId(id)})
+    return old_company
+
+@app.route(company_namespace+'<id>', methods=['GET'])
 def get_company(id, requester_id=None):
     try:
         return get_data({'_id': ObjectId(id)}, requester_id)
@@ -75,6 +96,3 @@ def follow_company(following_id):
             notify(r, notification, 'user_following')
 
         return new_followed
-
-
-
