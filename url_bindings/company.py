@@ -91,6 +91,7 @@ def follow_company(following_id):
             'type': 'Users',
             'imageUrl': current['imageUrl']
         }
+        print(new_followed.keys())
         recipients = [k for k, v in sids.items() if v == new_followed['ownerId']]
         for r in recipients:
             notify(r, notification, 'user_following')

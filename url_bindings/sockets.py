@@ -13,7 +13,7 @@ def notify(client_id, data, message_type='notification'):
 @socket.on('disconnection')
 def disconnection(user_data):
     print(user_data['email'], 'disconnected')
-    user_sids = [k for k,v in sids.items() if v == user_data['email']]
+    user_sids = [k for k,v in sids.items() if v == user_data['id']]
     for u in user_sids:
         del sids[u]
     return user_data
@@ -22,7 +22,7 @@ def disconnection(user_data):
 def new_connection(user_data):
     #When a user connects, send them a notification
     print(user_data['email'], 'connected')
-    sids[request.sid] = user_data['email']
+    sids[request.sid] = user_data['id']
     notification = {
         'id': str(ObjectId()),
         'from': user_data,
@@ -32,7 +32,8 @@ def new_connection(user_data):
         'type': 'Users',
         'imageUrl': user_data['imageUrl']
     }
-    recipients = [v for v, k in sids.items() if k == user_data['email'] or k in user_data['following']]
+    recipients = [v for v, k in sids.items() if k == user_data['id'] or k in user_data['following']]
+
     for r in recipients:
         notify(r, notification, 'user_connection')
 

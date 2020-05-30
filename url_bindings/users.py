@@ -73,7 +73,7 @@ def follow_user(following_id):
             'type': 'Users',
             'imageUrl': current['imageUrl']
         }
-        recipients = [k for k, v in sids.items() if v == new_followed['email']]
+        recipients = [k for k, v in sids.items() if v == new_followed['id']]
         print(sids)
         for r in recipients:
             notify(r, notification, 'user_following')

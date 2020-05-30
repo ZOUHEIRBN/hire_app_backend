@@ -1,6 +1,10 @@
 from bindings import database
 from business_objects import User, Company
 from bson import ObjectId
+
+from utility_functions import *
+
+
 def decrypt_password(crypted):
     return crypted
 
@@ -18,6 +22,7 @@ def preprocess(x):
 
     # Getting commenting users data
     for comment in x['comments']:
+        comment['id'] = str(comment['id'])
         commenting_user = User.get_data({
             '_id': ObjectId(comment['commenting_user'])
         })
@@ -44,6 +49,9 @@ def preprocess(x):
     if True:
         x["badges"].append({"category": "match", "name": "Watchout", "value": 89})
 
+    # Setting an image if not provided
+    if 'imageUrl' not in x.keys():
+        x['imageUrl'] = 'data:image/png;base64, ' + generate_profile_image().decode('utf-8')
     return x
 
 def get_data(query, requester_id=None, return_unique=False):

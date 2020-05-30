@@ -1,6 +1,7 @@
 from bson import ObjectId
 
 from bindings import database
+from utility_functions import *
 
 
 def decrypt_password(crypted):
@@ -59,6 +60,9 @@ def preprocess(x, requester_id=None):
     if True:
         x["badges"].append({"category": "match", "name": "Watchout"})
 
+    # Setting an image if not provided
+    if 'imageUrl' not in x.keys():
+        x['imageUrl'] = 'data:image/png;base64, ' + generate_profile_image().decode('utf-8')
     return x
 
 def get_data(query, requester_id=None, return_unique=False):

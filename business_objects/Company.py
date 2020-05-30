@@ -1,5 +1,5 @@
 from bson import ObjectId
-
+from utility_functions import *
 from bindings import database
 def clean_id(x):
     if '_id' in x.keys():
@@ -27,6 +27,9 @@ def preprocess(x, requester_id=None):
         if True:
             x["badges"].append({"category": "match", "name": "Watchout"})
 
+    #Setting an image if not provided
+    if 'imageUrl' not in x.keys():
+        x['imageUrl'] = 'data:image/png;base64, ' + generate_profile_image().decode('utf-8')
     return x
 
 def get_data(query, requester_id=None, return_unique=None):
