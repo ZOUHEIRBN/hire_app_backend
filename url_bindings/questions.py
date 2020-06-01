@@ -1,5 +1,6 @@
 from datetime import datetime
-
+import math
+import numpy as np
 from bson import ObjectId
 from business_objects.User import get_data as ugd
 from bindings import database
@@ -56,3 +57,22 @@ def delete_quizz(id):
     old_company = get_data({'_id': ObjectId(id)})
     database['questions'].delete_one({'_id': ObjectId(id)})
     return old_company
+
+@app.route(quizz_namespace + 'topic/<topic>', methods=['GET'])
+def get_quizz(topic):
+    return get_data({'related_fields': {'$in': [topic]}}, return_unique=False)
+
+@app.route(quizz_namespace + 'quizz/', methods=['POST'])
+def revise_quizz():
+    submitted = request.get_json()
+    scores = {}
+    for question in submitted:
+        correct_answers = get_data({'_id': ObjectId(question['id'])}, return_unique=True)['answers']
+        submitted_answers = question['answers']
+
+        positive_score = len([x for x in submitted_answers if x in correct_answers])
+        negative_score = len([x for x in submitted_answers if x not in correct_answers])
+        user_score = (positive_score - negative_score) / len(submitted_answers)
+        scores[question['id']] = math.floor(user_score*10) if user_score > 0 else 0
+
+    return str(np.mean([s for s in scores.values()]))
