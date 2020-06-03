@@ -17,7 +17,8 @@ def user_cr():
     elif request.method == 'POST':
         user = request.get_json()
         database['users'].insert_one(user)
-        #database['users'].update_many({'email': 'ZouheirBN'}, {'$push': {'following'}})
+        user = get_user_by_credentials(user['email'], user['password'])
+        return user
     return {}
 
 @app.route(user_namespace+'<id>')

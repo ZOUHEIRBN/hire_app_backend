@@ -9,10 +9,10 @@ from main import app, socket
 post_namespace = '/posts/'
 
 
-@app.route(post_namespace, methods=['GET', 'POST', 'PUT'])
-def post_crd():
+@app.route(post_namespace+'current_id=<requester_id>', methods=['GET', 'POST', 'PUT'])
+def post_crd(requester_id):
     if request.method == 'GET':
-        return get_data({})
+        return get_data({}, requester_id=requester_id)
     elif request.method == 'POST':
         post = request.get_json()
         post['submissions'] = []

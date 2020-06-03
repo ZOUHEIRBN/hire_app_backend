@@ -1,14 +1,14 @@
 from bindings import database
 from business_objects import User, Company
 from bson import ObjectId
-
+from url_bindings import jobs
 from utility_functions import *
 
 
 def decrypt_password(crypted):
     return crypted
 
-def preprocess(x):
+def preprocess(x, requester_id=None):
     #Rename _id to id
     x['id'] = str(x['_id'])
     del x['_id']
@@ -42,12 +42,23 @@ def preprocess(x):
     elif str(x['subject']).lower().endswith('demand'):
         x["badges"].append({"category": "posttype", "name": "demand"})
 
-    if True:
-        x["badges"].append({"category": "fav", "name": "Favorite"})
-    if True:
-        x["badges"].append({"category": "jobtype", "name": "Stage"})
-    if True:
-        x["badges"].append({"category": "match", "name": "Watchout", "value": 89})
+    # if True:
+    #     x["badges"].append({"category": "fav", "name": "Favorite"})
+    # if True:
+    #     x["badges"].append({"category": "jobtype", "name": "Stage"})
+    if requester_id is not None and str(requester_id) != '0':
+        watchout_score = 100*jobs.match_user_by_skills(x['id'], requester_id)
+        wanted_score = 100*jobs.match_user_by_constraints(x['id'], requester_id)
+        if watchout_score > 10 and wanted_score > 10:
+            x["badges"].append({"category": "match", "name": "Golden match", "value": int(watchout_score + wanted_score)//2})
+        else:
+            #Set Watchout badge
+            if watchout_score > 10:
+                x["badges"].append({"category": "match", "name": "Watchout", "value": int(watchout_score)})
+
+            #Set Wanted badge
+            if wanted_score > 10:
+                x["badges"].append({"category": "match", "name": "Wanted", "value": int(wanted_score)})
 
     # Setting an image if not provided
     if 'imageUrl' not in x.keys():
@@ -57,7 +68,7 @@ def preprocess(x):
 def get_data(query, requester_id=None, return_unique=False):
     posts = database['posts'].find(query, {'id': 0})
     posts = [x for x in posts]
-    posts = [preprocess(x) for x in posts]
+    posts = [preprocess(x, requester_id) for x in posts]
 
     if len(posts) == 1 or return_unique:
         return posts[0]
