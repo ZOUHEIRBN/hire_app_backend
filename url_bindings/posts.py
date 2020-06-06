@@ -60,6 +60,23 @@ def get_posts_by_owner_id(id):
 def get_posts_by_type(type):
     return get_data({'type': type})
 
+@app.route(post_namespace+'follow/<user_id>', methods=['PUT'])
+def submit_demand(user_id):
+    post = request.get_json()
+    follows = dict(database['posts'].find_one({'_id': ObjectId(post['id'])}, {"follows": 1}))
+    if "follows" in follows.keys():
+        if user_id not in follows["follows"]:
+            database['posts'].update_one({'_id': ObjectId(post['id'])}, {'$push': {'follows': user_id}})
+            post['following'] = True
+        else:
+            database['posts'].update_one({'_id': ObjectId(post['id'])}, {'$pull': {'follows': user_id}})
+            post['following'] = False
+
+    else:
+        database['posts'].update_one({'_id': ObjectId(post['id'])}, {'$set': {'follows': [user_id]}})
+        post['following'] = True
+    return post
+
 #Comments
 @app.route(post_namespace+'<post_id>/comment/<comment_id>', methods=['PUT', 'POST', 'DELETE'])
 def comment_cud(post_id, comment_id):

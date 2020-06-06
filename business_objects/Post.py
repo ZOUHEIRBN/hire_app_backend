@@ -23,6 +23,7 @@ def preprocess(x, requester_id=None):
     # Getting commenting users data
     for comment in x['comments']:
         comment['id'] = str(comment['id'])
+        print(comment['commenting_user'])
         commenting_user = User.get_data({
             '_id': ObjectId(comment['commenting_user'])
         })
@@ -33,6 +34,13 @@ def preprocess(x, requester_id=None):
             })
 
         comment['commenting_user'] = commenting_user
+
+    #Checking following
+    x['following'] = False
+    submissions = dict(database['posts'].find_one({'_id': ObjectId(x['id'])}, {"follows": 1}))
+    if "follows" in submissions.keys():
+        if requester_id in submissions["follows"]:
+            x['following'] = True
 
     # Setting badges
     x["badges"] = []
