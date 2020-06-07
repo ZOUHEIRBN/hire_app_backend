@@ -17,12 +17,13 @@ def post_crd(requester_id):
         post = request.get_json()
         post['submissions'] = []
         post['comments'] = []
+        post['timestamp'] = datetime.datetime.now()
         database['posts'].insert_one(post)
     elif request.method == 'PUT':
         post = request.get_json()
         old_post = get_data({'_id': ObjectId(post['id'])})
         for k, v in post.items():
-            if k not in ['id','comments', 'ownerId']:
+            if k not in ['id', 'comments', 'timestamp', 'owner']:
                 old_post[k] = v
 
         database['posts'].update({'_id': ObjectId(post['id'])}, old_post)
@@ -94,9 +95,21 @@ def comment_cud(post_id, comment_id):
     elif request.method == 'PUT':
         comment = request.get_json()
         comment['timestamp'] = str(datetime.datetime.now())
+
+        new_comment = comment
+        new_comment['commenting_user'] = comment['commenting_user']['id']
+
+        #Remove old comment
         database['posts'].update({'_id': ObjectId(post_id)}, {
-         '$push': {'comments': comment}
+            '$pull': {'comments': {'id': ObjectId(comment_id)}}
         })
+
+        # Insert new comment
+        database['posts'].update({'_id': ObjectId(post_id)}, {
+            '$push': {'comments': new_comment}
+        })
+        return comment
+
     elif request.method == 'DELETE':
         comment = database['posts'].find({"_id": ObjectId(post_id)}, {'comments': 1})
         comment = [x['comments'] for x in comment][0]

@@ -10,11 +10,23 @@ from url_bindings.users import user_namespace
 from weasyprint import HTML, CSS
 from io import BytesIO
 
-@app.route(user_namespace+'<id>/resume/', methods=['GET', 'PUT'])
+@app.route(user_namespace+'<id>/resume/', methods=['GET', 'PUT', 'DELETE'])
 def crud_resume(id):
     if request.method == 'PUT':
         resume = request.get_json()
         database['users'].update({'_id': ObjectId(id)}, {"$set": {"resume": resume}})
+        return resume
+
+    elif request.method == 'DELETE':
+        resume = {
+          "academic_cursus": [],
+          "professionnal_cursus": [],
+          "academic_projects": [],
+          "languages": [],
+          "skills": [],
+        }
+        database['users'].update({'_id': ObjectId(id)}, {"$set": {"resume": resume}})
+        return resume
 
     elif request.method == 'GET':
         resume = get_data({'_id': ObjectId(id)})['resume']

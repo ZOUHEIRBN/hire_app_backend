@@ -10,7 +10,7 @@ from main import app
 
 user_namespace = '/users/'
 
-@app.route(user_namespace, methods=['GET', 'POST'])
+@app.route(user_namespace, methods=['GET', 'POST', 'PUT'])
 def user_cr():
     if request.method == 'GET':
         return get_data({}, requester_id=request.args.get('current_user'))
@@ -19,6 +19,19 @@ def user_cr():
         database['users'].insert_one(user)
         user = get_user_by_credentials(user['email'], user['password'])
         return user
+    elif request.method == 'PUT':
+        user = request.get_json()
+        old_user = database['users'].find_one({'_id': ObjectId(user['id'])})
+        print(old_user)
+
+        for k,v in user.items():
+            if k not in ['id', 'following', 'followers', 'badges']:
+                old_user[k] = v
+        print(old_user)
+        database['users'].update_one({'_id': ObjectId(user['id'])}, {'$set': old_user})
+
+        return user
+
     return {}
 
 @app.route(user_namespace+'<id>')
