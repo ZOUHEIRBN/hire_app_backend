@@ -2,7 +2,7 @@ from datetime import datetime
 import math
 import numpy as np
 from bson import ObjectId
-from business_objects.User import get_data as ugd
+from business_methods.User import get_data as ugd
 from bindings import database
 from main import app
 from url_bindings.sockets import *

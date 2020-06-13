@@ -3,8 +3,8 @@ from datetime import datetime
 from bson import ObjectId
 
 from bindings import database
-from business_objects.Company import get_data
-from business_objects.User import get_data as ugd
+from business_methods.Company import get_data
+from business_methods.User import get_data as ugd
 from main import app
 from url_bindings.sockets import *
 

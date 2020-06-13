@@ -1,11 +1,13 @@
 from bson import ObjectId
 
 from bindings import database
+from business_methods.Resume import *
 from utility_functions import *
 
 
 def decrypt_password(crypted):
     return crypted
+
 def get_following_data(x):
     following = database['users'].find({
         '_id': {'$in': [f['id'] for f in x['following']]}
@@ -76,6 +78,22 @@ def get_data(query, requester_id=None, return_unique=False):
         return users[0]
     return {'body': users}
 
-class User:
-    def __init__(self):
-        pass
+#User similarity
+def user_to_user(user_a, user_b):
+    res_a, res_b = resume_to_vector(user_a), resume_to_vector(user_b)
+    comparison = {}
+    comparison['academic'] = academic_compare(res_a, res_b)
+    comparison['experience'] = experience_compare(res_a, res_b)
+    comparison['lang'] = lang_compare(res_a, res_b)
+    comparison['skills'] = skills_compare(res_a, res_b)
+    return 1 - np.mean(list(comparison.values()))
+
+#Match score
+def user_to_offer(user, job):
+    res_a, res_b = resume_to_vector(user), job_to_vector(job)
+    comparison = {}
+    comparison['academic'] = academic_compare(res_a, res_b)
+    comparison['experience'] = experience_compare(res_a, res_b)
+    comparison['lang'] = lang_compare(res_a, res_b)
+    comparison['skills'] = skills_compare(res_a, res_b)
+    return 1 - np.mean(list(comparison.values()))

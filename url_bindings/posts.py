@@ -2,11 +2,12 @@ import time, datetime
 from bson import ObjectId
 from flask import request
 from bindings import database
-from business_objects.Post import get_data
-from business_objects.User import get_data as ugd
-from main import app, socket
+from business_methods.Post import get_data
+from business_methods.User import get_data as ugd
+from main import app, socket, celery
 
 post_namespace = '/posts/'
+
 
 
 @app.route(post_namespace+'current_id=<requester_id>', methods=['GET', 'POST', 'PUT'])
@@ -17,6 +18,8 @@ def post_crd(requester_id):
         post = request.get_json()
         post['submissions'] = []
         post['comments'] = []
+        post['watchout'] = []
+        post['wanted'] = []
         post['timestamp'] = datetime.datetime.now()
         database['posts'].insert_one(post)
     elif request.method == 'PUT':

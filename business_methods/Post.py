@@ -1,26 +1,20 @@
 from bindings import database
-from business_objects import User, Company
+from business_methods import User, Company
 from bson import ObjectId
-from url_bindings import jobs
 from utility_functions import *
-
 
 def decrypt_password(crypted):
     return crypted
 
-def preprocess(x, requester_id=None):
-    #Rename _id to id
-    x['id'] = str(x['_id'])
-    del x['_id']
-
-    # Getting post owner data
+def get_owner_data(x):
     owner = User.get_data({'_id': ObjectId(x['ownerId'])})
     if 'body' in owner.keys() and len(owner['body']) == 0:
         owner = Company.get_data({'_id': ObjectId(x['ownerId'])})
 
     x['owner'] = owner
+    return x
 
-    # Getting commenting users data
+def get_comment_data(x):
     for comment in x['comments']:
         comment['id'] = str(comment['id'])
         print(comment['commenting_user'])
@@ -35,12 +29,30 @@ def preprocess(x, requester_id=None):
 
         comment['commenting_user'] = commenting_user
 
-    #Checking following
+    return x
+
+def check_following(x, requester_id):
     x['following'] = False
     submissions = dict(database['posts'].find_one({'_id': ObjectId(x['id'])}, {"follows": 1}))
     if "follows" in submissions.keys():
         if requester_id in submissions["follows"]:
             x['following'] = True
+
+    return x
+
+def preprocess(x, requester_id=None):
+    #Rename _id to id
+    x['id'] = str(x['_id'])
+    del x['_id']
+
+    # Getting post owner data
+    x = get_owner_data(x)
+
+    # Getting commenting users data
+    x = get_comment_data(x)
+
+    #Checking following
+    x = check_following(x, requester_id)
 
     # Setting badges
     x["badges"] = []
@@ -55,18 +67,22 @@ def preprocess(x, requester_id=None):
     # if True:
     #     x["badges"].append({"category": "jobtype", "name": "Stage"})
     if requester_id is not None and str(requester_id) != '0':
-        watchout_score = 100*jobs.match_user_by_skills(x['id'], requester_id)
-        wanted_score = 100*jobs.match_user_by_constraints(x['id'], requester_id)
+        watchout_score = 100 #*User.user_to_offer(requester_id, x['id'])
+        wanted_score = 0 #100*jobs.match_user_by_constraints(x['id'], requester_id)
+
+        wo_score = 0
+        # print(x['watchout'])
+
         if watchout_score > 10 and wanted_score > 10:
-            x["badges"].append({"category": "match", "name": "Golden match", "value": int(watchout_score + wanted_score)//2})
+            x["badges"].append({"category": "match", "name": "Golden match", "value": round(watchout_score + wanted_score)//2})
         else:
             #Set Watchout badge
-            if watchout_score > 10:
-                x["badges"].append({"category": "match", "name": "Watchout", "value": int(watchout_score)})
+            if watchout_score > 1:
+                x["badges"].append({"category": "match", "name": "Watchout", "value": round(watchout_score, 1)})
 
             #Set Wanted badge
-            if wanted_score > 10:
-                x["badges"].append({"category": "match", "name": "Wanted", "value": int(wanted_score)})
+            if wanted_score > 1:
+                x["badges"].append({"category": "match", "name": "Wanted", "value": round(wanted_score, 1)})
 
     # Setting an image if not provided
     if 'imageUrl' not in x.keys():
@@ -81,7 +97,3 @@ def get_data(query, requester_id=None, return_unique=False):
     if len(posts) == 1 or return_unique:
         return posts[0]
     return {'body': posts}
-
-class Post:
-    def __init__(self):
-        pass

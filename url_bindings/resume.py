@@ -2,7 +2,7 @@ import pandas as pd
 
 from flask import Response, request, render_template, send_file
 import requests
-from business_objects.User import *
+from business_methods.User import *
 from bindings import database, client, SERVER_URL
 from main import app
 from url_bindings.users import user_namespace

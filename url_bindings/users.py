@@ -3,7 +3,7 @@ from datetime import datetime
 from bson import ObjectId
 from flask import Response, request
 
-from business_objects.User import *
+from business_methods.User import *
 from bindings import database, client
 from url_bindings.sockets import *
 from main import app
