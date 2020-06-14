@@ -1,13 +1,12 @@
 import time, datetime
 from bson import ObjectId
 from flask import request
-from bindings import database
+from bindings import database, app
 from business_methods.Post import get_data
 from business_methods.User import get_data as ugd
-from main import app, socket, celery
+from db_tasks import *
 
 post_namespace = '/posts/'
-
 
 
 @app.route(post_namespace+'current_id=<requester_id>', methods=['GET', 'POST', 'PUT'])
@@ -21,7 +20,9 @@ def post_crd(requester_id):
         post['watchout'] = []
         post['wanted'] = []
         post['timestamp'] = datetime.datetime.now()
-        database['posts'].insert_one(post)
+        new_post = database['posts'].insert_one(post)
+        set_user_watchouts(new_post.inserted_id)
+
     elif request.method == 'PUT':
         post = request.get_json()
         old_post = get_data({'_id': ObjectId(post['id'])})
@@ -30,9 +31,8 @@ def post_crd(requester_id):
                 old_post[k] = v
 
         database['posts'].update({'_id': ObjectId(post['id'])}, old_post)
-
         old_post['owner'] = ugd({'_id': ObjectId(old_post['ownerId'])})
-
+        set_user_watchouts(post['id'])
         return old_post
 
 

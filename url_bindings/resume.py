@@ -3,11 +3,10 @@ import pandas as pd
 from flask import Response, request, render_template, send_file
 import requests
 from business_methods.User import *
-from bindings import database, client, SERVER_URL
-from main import app
+from bindings import database, app, SERVER_URL
 from url_bindings.users import user_namespace
 
-from weasyprint import HTML, CSS
+# from weasyprint import HTML, CSS
 from io import BytesIO
 
 @app.route(user_namespace+'<id>/resume/', methods=['GET', 'PUT', 'DELETE'])
@@ -44,9 +43,9 @@ def get_pdf_resume(id):
     #html = HTML(SERVER_URL+user_namespace+id+'/resume/write')
     r = requests.get(SERVER_URL+user_namespace+id+'/resume/write').content
     print(r)
-    html = HTML(string=r)
-    pdf = html.write_pdf()
-    return send_file(BytesIO(pdf), attachment_filename='google.pdf')
+    # html = HTML(string=r)
+    # pdf = html.write_pdf()
+    # return send_file(BytesIO(pdf), attachment_filename='google.pdf')
 
 
 #Backend only methods

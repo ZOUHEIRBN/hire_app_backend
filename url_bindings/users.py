@@ -4,9 +4,9 @@ from bson import ObjectId
 from flask import Response, request
 
 from business_methods.User import *
-from bindings import database, client
+from bindings import database, app
 from url_bindings.sockets import *
-from main import app
+
 
 user_namespace = '/users/'
 

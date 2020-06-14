@@ -63,7 +63,10 @@ def skills_to_vector(resume):
 
 def resume_to_vector(user_id):
     v = {}
-    resume = dict(database['users'].find_one({'_id': ObjectId(user_id)}))['resume']
+    resume = dict(database['users'].find_one({'_id': ObjectId(user_id)}))
+    if 'resume' not in resume.keys():
+        return v
+    resume = resume['resume']
     v['academic'] = academic_to_vector(resume)
     v['experience'] = experience_to_vector(resume)
     v['lang'] = lang_to_vector(resume)

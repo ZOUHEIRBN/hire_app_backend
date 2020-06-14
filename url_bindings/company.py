@@ -2,10 +2,8 @@ from datetime import datetime
 
 from bson import ObjectId
 
-from bindings import database
+from bindings import database, app
 from business_methods.Company import get_data
-from business_methods.User import get_data as ugd
-from main import app
 from url_bindings.sockets import *
 
 company_namespace = '/companies/'

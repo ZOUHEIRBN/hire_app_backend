@@ -1,8 +1,16 @@
 from datetime import datetime
 from bindings import database
 from bson import ObjectId
+from business_methods import User
 
 
-database['posts'].update_many({'_id': ObjectId('5e92f8b03bc187865692b516')}, {'$push': {'watchout': {''}}})
-posts = database['users'].find({}, {'resume': 0})
-print([x for x in posts][2])
+# database['users'].update_many({'resume': {'$exists': False}}, {'$set': {'resume': {
+#     'academic_cursus': [],'academic_projects': [],'professionnal_cursus': [],'languages': [],'skills': []
+# }}})
+from business_methods.Post import set_user_watchouts
+
+# set_user_watchouts('5e92f8b03bc187865692b516')
+# posts = database['posts'].update_many({'workdays': {'$exists': False}}, {'$set': {'workdays': ['Sun', 'Tue']}})
+posts = database['posts'].find({})
+print([x['type'] for x in posts][5])
+

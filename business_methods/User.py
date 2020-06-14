@@ -2,6 +2,7 @@ from bson import ObjectId
 
 from bindings import database
 from business_methods.Resume import *
+from business_methods.Job import *
 from utility_functions import *
 
 
@@ -89,11 +90,15 @@ def user_to_user(user_a, user_b):
     return 1 - np.mean(list(comparison.values()))
 
 #Match score
-def user_to_offer(user, job):
-    res_a, res_b = resume_to_vector(user), job_to_vector(job)
+def user_to_offer_requirements(user, job):
+    res_a, res_b = resume_to_vector(user), offer_requirements_to_vector(job)
     comparison = {}
     comparison['academic'] = academic_compare(res_a, res_b)
     comparison['experience'] = experience_compare(res_a, res_b)
     comparison['lang'] = lang_compare(res_a, res_b)
     comparison['skills'] = skills_compare(res_a, res_b)
     return 1 - np.mean(list(comparison.values()))
+
+def user_to_offer_constraints(user_id, offer_id):
+    user_demands = [offer_to_demand(offer_id, str(x['_id'])) for x in database['posts'].find({'ownerId': user_id, 'type':'Demand'}, {'_id': 1})]
+    return np.mean(user_demands)
