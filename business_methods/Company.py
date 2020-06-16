@@ -1,6 +1,7 @@
 from bson import ObjectId
 from utility_functions import *
 from bindings import database
+from business_methods import User
 def clean_id(x):
     if '_id' in x.keys():
         x['id'] = str(x['_id'])
@@ -41,3 +42,4 @@ def get_data(query, requester_id=None, return_unique=None):
     if len(companies) == 1:
         return companies[0]
     return {'body': companies}
+

@@ -10,7 +10,7 @@ from business_methods import User
 from business_methods.Post import set_user_watchouts
 
 # set_user_watchouts('5e92f8b03bc187865692b516')
-# posts = database['posts'].update_many({'workdays': {'$exists': False}}, {'$set': {'workdays': ['Sun', 'Tue']}})
+# posts = database['posts'].update_many({'type': 'offer'}, {'$set': {'type': 'Offer'}})
 posts = database['posts'].find({})
-print([x['type'] for x in posts][5])
+print(set([x['type'] for x in posts]))
 

@@ -4,6 +4,9 @@ from flask_cors import CORS
 from pymongo import MongoClient
 import time
 
+import redis
+from rq import Queue
+
 
 #Loading Database
 client = MongoClient(port=27017)
@@ -22,5 +25,10 @@ app = Flask(__name__, template_folder='./templates', static_folder='./static')
 CORS(app)
 socket = SocketIO(app, cors_allowed_origins="*")
 
+#Init .redis connection
+red = redis.Redis()
+
+#Init task queue
+task_queue = Queue(connection=red)
 
 from url_bindings import users, posts, company, resume, sockets, questions

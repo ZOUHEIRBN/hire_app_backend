@@ -1,0 +1,14 @@
+flask
+flask_socketio
+flask_cors
+rq
+redis
+requests
+pymongo
+pandas
+bson
+numpy
+scipy
+sklearn
+weasyprint
+opencv-contrib-python

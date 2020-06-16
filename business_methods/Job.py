@@ -1,6 +1,6 @@
 # # Evaluating a job offer
 from scipy import spatial
-
+from business_methods import User
 from bindings import database
 from bson import ObjectId
 
@@ -155,3 +155,8 @@ def offer_to_demand(offer_id, demand_id):
         'businessTravels_international'] else 0
 
     return np.mean(list(match_dict.values()))
+
+def demand_to_company_requirements(demand_id, company_id):
+    offers = [User.offer_to_demand(str(x['_id']), demand_id) for x in database['posts'].find({'type': 'Offer', 'ownerId': company_id})]
+    # print(offers)
+    return max(offers)

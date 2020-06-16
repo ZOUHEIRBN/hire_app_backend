@@ -1,5 +1,5 @@
 from bindings import database
-from business_methods import User, Company
+from business_methods import User, Job, Company
 from bson import ObjectId
 from utility_functions import *
 
@@ -44,13 +44,35 @@ def check_following(x, requester_id):
 
     return x
 
+def set_offer_badges(x, requester_id):
+    x["badges"] = []
+    x["badges"].append({"category": "posttype", "name": "Offer"})
+    if requester_id is not None and str(requester_id) != '0':
+        # Set Watchout badge
+        watchout_score = [u['score'] for u in x['watchout'] if u['id'] == requester_id]
+        watchout_score = 100 * watchout_score[0] if len(watchout_score) > 0 else 0
+        if watchout_score > 1:
+            x["badges"].append({"category": "offer_match", "name": "Watchout", "value": round(watchout_score, 0)})
+
+        # Set Wanted badge
+        wanted_score = 100 #* User.user_to_offer_constraints(requester_id, x['id'])
+        if wanted_score > 1:
+            x["badges"].append({"category": "offer_match", "name": "Wanted", "value": round(wanted_score, 0)})
+
+    return x
+
+def set_demand_badges(x, requester_id):
+    x["badges"] = []
+    x["badges"].append({"category": "posttype", "name": "Demand"})
+    maxwatchout = 100*Job.demand_to_company_requirements(x['id'], x['ownerId'])
+    if maxwatchout > 10:
+        x["badges"].append({"category": "demand_match", "name": "Wanted", "value": round(maxwatchout, 0)})
+    return x
 
 def preprocess(x, requester_id=None):
     # Rename _id to id
     x['id'] = str(x['_id'])
     del x['_id']
-
-    print(x['id'])
 
     # Getting post owner data
     x = get_owner_data(x)
@@ -62,36 +84,10 @@ def preprocess(x, requester_id=None):
     x = check_following(x, requester_id)
 
     # Setting badges
-    x["badges"] = []
-
-    if str(x['subject']).lower().endswith('offer'):
-        x["badges"].append({"category": "posttype", "name": "offer"})
-    elif str(x['subject']).lower().endswith('demand'):
-        x["badges"].append({"category": "posttype", "name": "demand"})
-
-    # if True:
-    #     x["badges"].append({"category": "fav", "name": "Favorite"})
-    # if True:
-    #     x["badges"].append({"category": "jobtype", "name": "Stage"})
-    if requester_id is not None and str(requester_id) != '0':
-        watchout_score = [u['score'] for u in x['watchout'] if u['id'] == requester_id]
-        watchout_score = 100*watchout_score[0] if len(watchout_score) > 0 else 0
-        wanted_score = 100*User.user_to_offer_constraints(requester_id, x['id'])
-
-        if watchout_score > 10 and wanted_score > 10 and False:
-            x["badges"].append({
-                "category": "match",
-                "name": "Golden match",
-                "value": round(watchout_score + wanted_score)//2})
-
-        else:
-            # Set Watchout badge
-            if watchout_score > 1:
-                x["badges"].append({"category": "match", "name": "Watchout", "value": round(watchout_score, 1)})
-
-            # Set Wanted badge
-            if wanted_score > 1:
-                x["badges"].append({"category": "match", "name": "Wanted", "value": round(wanted_score, 1)})
+    if str(x['type']).lower().endswith('offer'):
+        x = set_offer_badges(x, requester_id)
+    elif str(x['type']).lower().endswith('demand'):
+        x = set_demand_badges(x, requester_id)
 
     # Setting an image if not provided
     if 'imageUrl' not in x.keys():

@@ -28,6 +28,30 @@ def get_followers_data(x):
     followers = [clean_id(f) for f in followers]
     return followers
 
+def set_following_data(x, requester_id):
+    x['following'] = get_following_data(x)
+    x['followers'] = get_followers_data(x)
+
+    if requester_id and requester_id != '0':
+        requester = database['users'].find_one({'_id': ObjectId(requester_id)}, {'_id': 1, 'following': 1})
+
+        if requester is None or x == dict(requester):
+            return x
+
+        requester = clean_id(requester)
+
+        if requester["id"] in [f['id'] for f in x["followers"]] and requester["id"] in [f['id'] for f in
+                                                                                        x["following"]]:
+            x["badges"].append({"category": "social", "name": "You mutually follow each other"})
+
+        elif requester["id"] in [f['id'] for f in x["followers"]]:
+            x["badges"].append({"category": "social", "name": "You are a follower"})
+
+        elif requester["id"] in [f['id'] for f in x["following"]]:
+            x["badges"].append({"category": "social", "name": "Follows you"})
+
+    return x
+
 def clean_id(x):
     if '_id' in x.keys():
         x['id'] = str(x['_id'])
@@ -41,27 +65,17 @@ def clean_id(x):
 def preprocess(x, requester_id=None):
     x = clean_id(x)
     # Follower data
-    x['following'] = get_following_data(x)
-    x['followers'] = get_followers_data(x)
     x["badges"] = []
-    if requester_id and requester_id != '0':
-        requester = database['users'].find_one({'_id': ObjectId(requester_id)}, {'_id': 1, 'following': 1})
+    x = set_following_data(x, requester_id)
 
-        if requester is None or x == dict(requester):
-            return x
+    #Setting badges
+    watchout_score = 100 * user_to_company_requirements(x['id'], requester_id)
+    if watchout_score > 10:
+        x["badges"].append({"category": "user_match", "name": "Watchout", "value": round(watchout_score, 0)})
 
-        requester = clean_id(requester)
-
-        if requester["id"] in [f['id'] for f in x["followers"]] and requester["id"] in [f['id'] for f in x["following"]]:
-            x["badges"].append({"category": "social", "name": "You mutually follow each other"})
-
-        elif requester["id"] in [f['id'] for f in x["followers"]]:
-            x["badges"].append({"category": "social", "name": "You are a follower"})
-
-        elif requester["id"] in [f['id'] for f in x["following"]]:
-            x["badges"].append({"category": "social", "name": "Follows you"})
-    if True:
-        x["badges"].append({"category": "match", "name": "Watchout"})
+    wanted_score = 100 * user_to_company_constraints(x['id'], requester_id)
+    if wanted_score > 10:
+        x["badges"].append({"category": "user_match", "name": "Wanted", "value": round(wanted_score, 0)})
 
     # Setting an image if not provided
     if 'imageUrl' not in x.keys():
@@ -102,3 +116,15 @@ def user_to_offer_requirements(user, job):
 def user_to_offer_constraints(user_id, offer_id):
     user_demands = [offer_to_demand(offer_id, str(x['_id'])) for x in database['posts'].find({'ownerId': user_id, 'type':'Demand'}, {'_id': 1})]
     return np.mean(user_demands)
+
+def user_to_company_requirements(user_id, company_id):
+    match_scores = [User.user_to_offer_requirements(user_id, str(x['_id'])) for x in database['posts'].find({'ownerId': company_id, 'type':'Offer'})]
+    if len(match_scores) == 0:
+        return 0
+    return max(match_scores)
+
+def user_to_company_constraints(user_id, company_id):
+    match_scores = [User.user_to_offer_constraints(user_id, str(x['_id'])) for x in database['posts'].find({'ownerId': company_id, 'type':'Offer'})]
+    if len(match_scores) == 0:
+        return 0
+    return max(match_scores)

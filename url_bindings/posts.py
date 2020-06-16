@@ -1,8 +1,8 @@
 import time, datetime
 from bson import ObjectId
 from flask import request
-from bindings import database, app
-from business_methods.Post import get_data
+from bindings import database, app, task_queue
+from business_methods.Post import get_data, set_user_watchouts
 from business_methods.User import get_data as ugd
 from db_tasks import *
 
@@ -21,7 +21,7 @@ def post_crd(requester_id):
         post['wanted'] = []
         post['timestamp'] = datetime.datetime.now()
         new_post = database['posts'].insert_one(post)
-        set_user_watchouts(new_post.inserted_id)
+        task_queue.enqueue(set_user_watchouts, new_post.inserted_id)
 
     elif request.method == 'PUT':
         post = request.get_json()
@@ -32,7 +32,7 @@ def post_crd(requester_id):
 
         database['posts'].update({'_id': ObjectId(post['id'])}, old_post)
         old_post['owner'] = ugd({'_id': ObjectId(old_post['ownerId'])})
-        set_user_watchouts(post['id'])
+        task_queue.enqueue(set_user_watchouts, post['id'])
         return old_post
 
 
@@ -60,9 +60,9 @@ def get_posts_by_owner_id(id):
     return get_data({'ownerId': id})
 
 
-@app.route(post_namespace+'type/<type>')
-def get_posts_by_type(type):
-    return get_data({'type': type})
+@app.route(post_namespace+'type/<post_type>/current_id=<requester_id>')
+def get_posts_by_type(post_type, requester_id):
+    return get_data({'type': post_type}, requester_id=requester_id)
 
 @app.route(post_namespace+'follow/<user_id>', methods=['PUT'])
 def submit_demand(user_id):
